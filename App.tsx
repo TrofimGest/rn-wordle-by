@@ -1,5 +1,12 @@
-import React, {useState} from 'react';
-import {SafeAreaView, StatusBar, StyleSheet, Text, View} from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {
+  SafeAreaView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+  Alert,
+} from 'react-native';
 import {colors, CLEAR, ENTER} from './src/constants';
 import Keyboard from './src/components/Keyboard';
 
@@ -10,13 +17,39 @@ const copyArray = arr => {
 };
 
 function App(): JSX.Element {
-  const word = 'helow';
+  const word = 'лазер';
   const letters = word.split('');
   const [rows, setRows] = useState(
     new Array(NUMBER_OF_ROWS).fill(new Array(letters.length).fill('')),
   );
   const [currentRow, setCurrentRow] = useState(0);
   const [currentColumn, setCurrentColumn] = useState(0);
+  const [gameState, setGameState] = useState('playing'); // won, lost, playing
+
+  useEffect(() => {
+    if (currentRow > 0) {
+      checkGameState();
+    }
+  }, [currentRow]);
+
+  const checkGameState = () => {
+    if (checkIfWon() && gameState !== 'won') {
+      Alert.alert('Huraaay', 'You won!', [{text: 'Share'}]);
+      setGameState('won');
+    } else if (checkIfLost() && gameState !== 'lost') {
+      Alert.alert('Meh', 'Try again tomorrow!');
+      setGameState('lost');
+    }
+  };
+
+  const checkIfWon = () => {
+    const row = rows[currentRow - 1];
+    return row.every((letter, i) => letter === letters[i]);
+  };
+
+  const checkIfLost = () => {
+    return !checkIfWon() && currentRow === rows.length;
+  };
 
   const onKeyPressed = (key: string[]) => {
     const updatedRows = copyArray(rows);
@@ -50,6 +83,31 @@ function App(): JSX.Element {
     return row === currentRow && column === currentColumn;
   };
 
+  const getCellBGColor = (row, column) => {
+    const letter = rows[row][column];
+
+    if (row >= currentRow) {
+      return colors.black;
+    }
+    if (letter === letters[column]) {
+      return colors.primary;
+    }
+    if (letters.includes(letter)) {
+      return colors.secondary;
+    }
+    return colors.darkgrey;
+  };
+
+  const getAllLettersWithColor = color => {
+    return rows.flatMap((row, i) =>
+      row.filter((cell, j) => getCellBGColor(i, j) === color),
+    );
+  };
+
+  const greenCaps = getAllLettersWithColor(colors.primary);
+  const yellowCaps = getAllLettersWithColor(colors.secondary);
+  const greyCaps = getAllLettersWithColor(colors.darkgrey);
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" />
@@ -57,7 +115,7 @@ function App(): JSX.Element {
       <View style={styles.map}>
         {rows.map((row, i) => (
           <View key={`row:${i}`} style={styles.row}>
-            {row.map((cell: string, j: number) => (
+            {row.map((letter: string, j: number) => (
               <View
                 key={`cell:${i}:${j}`}
                 style={[
@@ -66,15 +124,21 @@ function App(): JSX.Element {
                     borderColor: isCellActive(i, j)
                       ? colors.grey
                       : colors.darkgrey,
+                    backgroundColor: getCellBGColor(i, j),
                   },
                 ]}>
-                <Text style={styles.cellText}>{cell.toUpperCase()}</Text>
+                <Text style={styles.cellText}>{letter.toUpperCase()}</Text>
               </View>
             ))}
           </View>
         ))}
       </View>
-      <Keyboard onKeyPressed={onKeyPressed} />
+      <Keyboard
+        onKeyPressed={onKeyPressed}
+        greenCaps={greenCaps}
+        yellowCaps={yellowCaps}
+        greyCaps={greyCaps}
+      />
     </SafeAreaView>
   );
 }
