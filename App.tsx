@@ -7,7 +7,8 @@ import {
   View,
   Alert,
 } from 'react-native';
-import {colors, CLEAR, ENTER} from './src/constants';
+import Clipboard from '@react-native-clipboard/clipboard';
+import {colors, CLEAR, ENTER, colorsToEmoji} from './src/constants';
 import Keyboard from './src/components/Keyboard';
 
 const NUMBER_OF_ROWS = 6;
@@ -34,7 +35,9 @@ function App(): JSX.Element {
 
   const checkGameState = () => {
     if (checkIfWon() && gameState !== 'won') {
-      Alert.alert('Huraaay', 'You won!', [{text: 'Share'}]);
+      Alert.alert('Huraaay', 'You won!', [
+        {text: 'Share', onPress: shareScore},
+      ]);
       setGameState('won');
     } else if (checkIfLost() && gameState !== 'lost') {
       Alert.alert('Meh', 'Try again tomorrow!');
@@ -51,7 +54,22 @@ function App(): JSX.Element {
     return !checkIfWon() && currentRow === rows.length;
   };
 
+  const shareScore = () => {
+    const textMap = rows
+      .map((row, i) =>
+        row.map(j => colorsToEmoji[getCellBGColor(i, j)]).join(''),
+      )
+      .filter(row => row)
+      .join('\n');
+    const textToShare = `Wordle \n${textMap}`;
+    Clipboard.setString(textToShare);
+    Alert.alert('Copied successfully', 'Share your score on you social media');
+  };
+
   const onKeyPressed = (key: string[]) => {
+    if (gameState !== 'playing') {
+      return;
+    }
     const updatedRows = copyArray(rows);
 
     if (key === CLEAR) {
