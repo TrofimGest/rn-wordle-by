@@ -22,12 +22,22 @@ const GuessDistributionLine = ({position, amount, percentage}) => {
   );
 };
 
-const GuessDistribution = () => {
+const GuessDistribution = ({distribution}) => {
+  if (!distribution) {
+    return;
+  }
+  const sum = distribution.reduce((acc, dist) => dist + acc, 0);
   return (
     <>
       <Text style={styles.subtitle}>GUESS DISTRIBUTION</Text>
       <View style={styles.guessDistributionContainer}>
-        <GuessDistributionLine position={0} amount={2} percentage={80} />
+        {distribution.map((dist, index) => (
+          <GuessDistributionLine
+            position={index + 1}
+            amount={dist}
+            percentage={(100 * sum) / dist}
+          />
+        ))}
       </View>
     </>
   );
@@ -39,6 +49,7 @@ const EndScreen = ({won = false, rows, getCellBGColor}) => {
   const [winRate, setWinRate] = useState(0);
   const [currentStreak, setCurrentStreak] = useState(0);
   const [maxStreak, SetMaxStreak] = useState(0);
+  const [distribution, setDistribution] = useState(null);
 
   useEffect(() => {
     readStates();
@@ -110,6 +121,18 @@ const EndScreen = ({won = false, rows, getCellBGColor}) => {
     setWinRate(Math.floor((100 * numberOfWins) / keys.length));
     setCurrentStreak(_currentStreak);
     SetMaxStreak(_currentStreak);
+
+    //guess distributoin
+
+    const dist = [0, 0, 0, 0, 0, 0]; //number of tries (6)
+
+    values.map(game => {
+      if (game.gameState === 'won') {
+        const tries = game.rows.filter(row => row[0]).length;
+        dist[tries] = dist[tries] + 1;
+      }
+    });
+    setDistribution(dist);
   };
 
   return (
@@ -124,7 +147,7 @@ const EndScreen = ({won = false, rows, getCellBGColor}) => {
         <Number number={currentStreak} label={'Current streak'} />
         <Number number={maxStreak} label={'Max streak'} />
       </View>
-      <GuessDistribution />
+      <GuessDistribution distribution={distribution} />
       <View style={styles.miscContainer}>
         <View style={styles.nextWordleContainer}>
           <Text style={styles.nextWordleText}>Next Wordle</Text>
