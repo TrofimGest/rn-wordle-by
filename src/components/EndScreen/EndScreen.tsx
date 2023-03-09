@@ -1,6 +1,14 @@
-import {Pressable, StyleSheet, Text, View, Alert} from 'react-native';
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
 import React, {useState, useEffect} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Animated, {SlideInLeft} from 'react-native-reanimated';
 import Clipboard from '@react-native-clipboard/clipboard';
 import {colors, colorsToEmoji} from '../../constants';
 
@@ -33,6 +41,7 @@ const GuessDistribution = ({distribution}) => {
       <View style={styles.guessDistributionContainer}>
         {distribution.map((dist, index) => (
           <GuessDistributionLine
+            key={`line-${index + 1}`}
             position={index + 1}
             amount={dist}
             percentage={(100 * sum) / dist}
@@ -50,6 +59,7 @@ const EndScreen = ({won = false, rows, getCellBGColor}) => {
   const [currentStreak, setCurrentStreak] = useState(0);
   const [maxStreak, SetMaxStreak] = useState(0);
   const [distribution, setDistribution] = useState(null);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     readStates();
@@ -76,7 +86,6 @@ const EndScreen = ({won = false, rows, getCellBGColor}) => {
 
     return `${hours}:${minutes}:${seconds}`;
   };
-
   const shareScore = () => {
     const textMap = rows
       .map((row, i) =>
@@ -99,10 +108,12 @@ const EndScreen = ({won = false, rows, getCellBGColor}) => {
     }
     const keys = Object.keys(data);
     const values = Object.values(data);
-    const numberOfWins = values.filter(game => game.gameState === 'won');
+    const numberOfWins = values.filter(game => game.gameState === 'won').length;
     let _currentStreak = 0;
     let _maxStreak = 0;
     let previousDay = 0;
+
+    //counting current streak and max streak for stats
     keys.forEach(key => {
       const day = parseInt(key.split('-')[1], 10);
       if (data[key].gameState === 'won' && _currentStreak === 0) {
@@ -121,10 +132,11 @@ const EndScreen = ({won = false, rows, getCellBGColor}) => {
     setWinRate(Math.floor((100 * numberOfWins) / keys.length));
     setCurrentStreak(_currentStreak);
     SetMaxStreak(_currentStreak);
+    setLoaded(true);
 
     //guess distributoin
 
-    const dist = [0, 0, 0, 0, 0, 0]; //number of tries (6)
+    const dist = [0, 0, 0, 0, 0, 0]; //number of lines/tries (6)
 
     values.map(game => {
       if (game.gameState === 'won') {
@@ -135,20 +147,36 @@ const EndScreen = ({won = false, rows, getCellBGColor}) => {
     setDistribution(dist);
   };
 
+  if (!loaded) {
+    return <ActivityIndicator />;
+  }
+
   return (
     <View>
-      <Text style={styles.title}>
+      <Animated.Text
+        entering={SlideInLeft.delay(100).springify().mass(0.4)}
+        style={styles.title}>
         {won ? 'congrats' : 'try again tommorow'}
-      </Text>
-      <Text style={styles.subtitle}>STATS</Text>
-      <View style={styles.statisticsContainer}>
+      </Animated.Text>
+      <Animated.Text
+        entering={SlideInLeft.delay(100).springify().mass(0.4)}
+        style={styles.subtitle}>
+        STATS
+      </Animated.Text>
+      <Animated.View
+        entering={SlideInLeft.delay(100).springify().mass(0.4)}
+        style={styles.statisticsContainer}>
         <Number number={played} label={'Played'} />
         <Number number={winRate} label={'Win %'} />
         <Number number={currentStreak} label={'Current streak'} />
         <Number number={maxStreak} label={'Max streak'} />
-      </View>
-      <GuessDistribution distribution={distribution} />
-      <View style={styles.miscContainer}>
+      </Animated.View>
+      <Animated.View entering={SlideInLeft.delay(150).springify().mass(0.4)}>
+        <GuessDistribution distribution={distribution} />
+      </Animated.View>
+      <Animated.View
+        entering={SlideInLeft.delay(200).springify().mass(0.4)}
+        style={styles.miscContainer}>
         <View style={styles.nextWordleContainer}>
           <Text style={styles.nextWordleText}>Next Wordle</Text>
           <Text style={styles.nextWordleTime}>{formatSeconds()}</Text>
@@ -156,7 +184,7 @@ const EndScreen = ({won = false, rows, getCellBGColor}) => {
         <Pressable style={styles.shareButton} onPress={shareScore}>
           <Text style={styles.shareButtonText}>Share</Text>
         </Pressable>
-      </View>
+      </Animated.View>
     </View>
   );
 };

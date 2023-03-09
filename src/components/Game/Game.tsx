@@ -7,6 +7,7 @@ import Keyboard from '../Keyboard';
 import dictionary from '../../dictionary';
 import {getDayOfTheYear, copyArray, getDayKey} from '../../utils';
 import EndScreen from '../EndScreen';
+import Animated, {SlideInLeft} from 'react-native-reanimated';
 
 const NUMBER_OF_ROWS = 6;
 const dayOfTheYear = getDayOfTheYear();
@@ -97,7 +98,7 @@ const Game = (): JSX.Element => {
     return !checkIfWon() && currentRow === rows.length;
   };
 
-  const onKeyPressed = (key: string[]) => {
+  const onKeyPressed = key => {
     if (gameState !== 'playing') {
       return;
     }
@@ -149,7 +150,7 @@ const Game = (): JSX.Element => {
 
   const getAllLettersWithColor = color => {
     return rows.flatMap((row, i) =>
-      row.filter(j => getCellBGColor(i, j) === color),
+      row.filter((cell, j) => getCellBGColor(i, j) === color),
     );
   };
 
@@ -175,10 +176,13 @@ const Game = (): JSX.Element => {
     <>
       <View style={styles.map}>
         {rows.map((row, i) => (
-          <View key={`row:${i}`} style={styles.row}>
-            {row.map((letter: string, j: number) => (
+          <Animated.View
+            entering={SlideInLeft.delay(i * 30)}
+            key={`row-${i}`}
+            style={styles.row}>
+            {row.map((letter, j) => (
               <View
-                key={`cell:${i}:${j}`}
+                key={`cell-${i}-${j}`}
                 style={[
                   styles.cell,
                   {
@@ -191,14 +195,14 @@ const Game = (): JSX.Element => {
                 <Text style={styles.cellText}>{letter.toUpperCase()}</Text>
               </View>
             ))}
-          </View>
+          </Animated.View>
         ))}
       </View>
       <Keyboard
         onKeyPressed={onKeyPressed}
-        greenCaps={greenCaps}
         yellowCaps={yellowCaps}
         greyCaps={greyCaps}
+        greenCaps={greenCaps}
       />
     </>
   );
