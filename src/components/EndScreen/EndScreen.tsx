@@ -1,5 +1,6 @@
 import {Pressable, StyleSheet, Text, View, Alert} from 'react-native';
 import React, {useState, useEffect} from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Clipboard from '@react-native-clipboard/clipboard';
 import {colors, colorsToEmoji} from '../../constants';
 
@@ -34,18 +35,14 @@ const GuessDistribution = () => {
 
 const EndScreen = ({won = false, rows, getCellBGColor}) => {
   const [secondsTillTommorow, setSecondsTillTommorow] = useState(0);
+  const [played, setPlayed] = useState(0);
+  const [winRate, setWinRate] = useState(0);
+  const [currentStreak, setCurrentStreak] = useState(0);
+  const [maxStreak, SetMaxStreak] = useState(0);
 
-  const shareScore = () => {
-    const textMap = rows
-      .map((row, i) =>
-        row.map(j => colorsToEmoji[getCellBGColor(i, j)]).join(''),
-      )
-      .filter(row => row)
-      .join('\n');
-    const textToShare = `Wordle \n${textMap}`;
-    Clipboard.setString(textToShare);
-    Alert.alert('Copied successfully', 'Share your score on you social media');
-  };
+  useEffect(() => {
+    readStates();
+  }, []);
 
   useEffect(() => {
     const updateTime = () => {
@@ -69,6 +66,52 @@ const EndScreen = ({won = false, rows, getCellBGColor}) => {
     return `${hours}:${minutes}:${seconds}`;
   };
 
+  const shareScore = () => {
+    const textMap = rows
+      .map((row, i) =>
+        row.map(j => colorsToEmoji[getCellBGColor(i, j)]).join(''),
+      )
+      .filter(row => row)
+      .join('\n');
+    const textToShare = `Wordle \n${textMap}`;
+    Clipboard.setString(textToShare);
+    Alert.alert('Copied successfully', 'Share your score on you social media');
+  };
+
+  const readStates = async () => {
+    let data;
+    try {
+      const stringifiedData = await AsyncStorage.getItem('@gameStates');
+      data = JSON.parse(stringifiedData);
+    } catch (error) {
+      console.log(error);
+    }
+    const keys = Object.keys(data);
+    const values = Object.values(data);
+    const numberOfWins = values.filter(game => game.gameState === 'won');
+    let _currentStreak = 0;
+    let _maxStreak = 0;
+    let previousDay = 0;
+    keys.forEach(key => {
+      const day = parseInt(key.split('-')[1], 10);
+      if (data[key].gameState === 'won' && _currentStreak === 0) {
+        _currentStreak += 1;
+      } else if (data[key].gameState === 'won' && previousDay + 1 === day) {
+        _currentStreak += 1;
+      } else {
+        if (_currentStreak > _maxStreak) {
+          _maxStreak = _currentStreak;
+        }
+        _currentStreak = data[key].gameState === 'won' ? 1 : 0;
+      }
+      previousDay = day;
+    });
+    setPlayed(keys.length);
+    setWinRate(Math.floor((100 * numberOfWins) / keys.length));
+    setCurrentStreak(_currentStreak);
+    SetMaxStreak(_currentStreak);
+  };
+
   return (
     <View>
       <Text style={styles.title}>
@@ -76,10 +119,10 @@ const EndScreen = ({won = false, rows, getCellBGColor}) => {
       </Text>
       <Text style={styles.subtitle}>STATS</Text>
       <View style={styles.statisticsContainer}>
-        <Number number={3} label={'Played'} />
-        <Number number={3} label={'Win %'} />
-        <Number number={3} label={'Current streak'} />
-        <Number number={3} label={'Max streak'} />
+        <Number number={played} label={'Played'} />
+        <Number number={winRate} label={'Win %'} />
+        <Number number={currentStreak} label={'Current streak'} />
+        <Number number={maxStreak} label={'Max streak'} />
       </View>
       <GuessDistribution />
       <View style={styles.miscContainer}>
