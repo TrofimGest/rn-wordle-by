@@ -1,12 +1,12 @@
 import React, {useState, useEffect} from 'react';
 import {Text, View, Alert, ActivityIndicator} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Clipboard from '@react-native-clipboard/clipboard';
-import {colors, CLEAR, ENTER, colorsToEmoji} from '../../constants';
+import {colors, CLEAR, ENTER} from '../../constants';
 import styles from './Game.styles';
-import Keyboard from '../../components/Keyboard';
+import Keyboard from '../Keyboard';
 import dictionary from '../../dictionary';
 import {getDayOfTheYear, copyArray, getDayKey} from '../../utils';
+import EndScreen from '../EndScreen';
 
 const NUMBER_OF_ROWS = 6;
 const dayOfTheYear = getDayOfTheYear();
@@ -58,7 +58,6 @@ const Game = (): JSX.Element => {
         : {};
       existingStates[dayKey] = dataForToday;
       const stringifiedData = JSON.stringify(existingStates);
-      console.log(stringifiedData);
       await AsyncStorage.setItem('@gameStates', stringifiedData);
     } catch (error) {
       console.log(error);
@@ -83,12 +82,8 @@ const Game = (): JSX.Element => {
 
   const checkGameState = () => {
     if (checkIfWon() && gameState !== 'won') {
-      Alert.alert('Huraaay', 'You won!', [
-        {text: 'Share', onPress: shareScore},
-      ]);
       setGameState('won');
     } else if (checkIfLost() && gameState !== 'lost') {
-      Alert.alert('Meh', 'Try again tomorrow!');
       setGameState('lost');
     }
   };
@@ -100,18 +95,6 @@ const Game = (): JSX.Element => {
 
   const checkIfLost = () => {
     return !checkIfWon() && currentRow === rows.length;
-  };
-
-  const shareScore = () => {
-    const textMap = rows
-      .map((row, i) =>
-        row.map(j => colorsToEmoji[getCellBGColor(i, j)]).join(''),
-      )
-      .filter(row => row)
-      .join('\n');
-    const textToShare = `Wordle \n${textMap}`;
-    Clipboard.setString(textToShare);
-    Alert.alert('Copied successfully', 'Share your score on you social media');
   };
 
   const onKeyPressed = (key: string[]) => {
@@ -166,7 +149,7 @@ const Game = (): JSX.Element => {
 
   const getAllLettersWithColor = color => {
     return rows.flatMap((row, i) =>
-      row.filter((cell, j) => getCellBGColor(i, j) === color),
+      row.filter(j => getCellBGColor(i, j) === color),
     );
   };
 
@@ -176,6 +159,16 @@ const Game = (): JSX.Element => {
 
   if (!loaded) {
     return <ActivityIndicator />;
+  }
+
+  if (gameState !== 'playing') {
+    return (
+      <EndScreen
+        won={gameState === 'won'}
+        rows={rows}
+        getCellBGColor={getCellBGColor}
+      />
+    );
   }
 
   return (
