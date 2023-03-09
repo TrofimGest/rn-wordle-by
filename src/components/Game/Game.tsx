@@ -5,22 +5,10 @@ import {colors, CLEAR, ENTER, colorsToEmoji} from '../../constants';
 import styles from './Game.styles';
 import Keyboard from '../../components/Keyboard';
 import dictionary from '../../dictionary';
+import {getDayOfTheYear, copyArray} from '../../utils';
 
 const NUMBER_OF_ROWS = 6;
-
-const getDayOfTheYear = () => {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), 0, 0);
-  const diff = now - start;
-  const oneDay = 1000 * 60 * 60 * 24;
-  const day = Math.floor(diff / oneDay);
-  return day;
-};
 const dayOfTheYear = getDayOfTheYear();
-
-const copyArray = arr => {
-  return [...arr.map(rows => [...rows])];
-};
 
 const Game = (): JSX.Element => {
   const word = dictionary[dayOfTheYear];
