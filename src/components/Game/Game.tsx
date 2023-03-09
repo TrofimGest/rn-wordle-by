@@ -1,16 +1,19 @@
 import React, {useState, useEffect} from 'react';
-import {Text, View, Alert} from 'react-native';
+import {Text, View, Alert, ActivityIndicator} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Clipboard from '@react-native-clipboard/clipboard';
 import {colors, CLEAR, ENTER, colorsToEmoji} from '../../constants';
 import styles from './Game.styles';
 import Keyboard from '../../components/Keyboard';
 import dictionary from '../../dictionary';
-import {getDayOfTheYear, copyArray} from '../../utils';
+import {getDayOfTheYear, copyArray, getDayKey} from '../../utils';
 
 const NUMBER_OF_ROWS = 6;
 const dayOfTheYear = getDayOfTheYear();
+const dayKey = getDayKey();
 
 const Game = (): JSX.Element => {
+  //AsyncStorage.removeItem('@gameStates');
   const word = dictionary[dayOfTheYear];
   const letters = word.split('');
   const [rows, setRows] = useState(
@@ -19,12 +22,64 @@ const Game = (): JSX.Element => {
   const [currentRow, setCurrentRow] = useState(0);
   const [currentColumn, setCurrentColumn] = useState(0);
   const [gameState, setGameState] = useState('playing'); // won, lost, playing
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     if (currentRow > 0) {
       checkGameState();
     }
   }, [currentRow]);
+
+  useEffect(() => {
+    if (loaded) {
+      storeStates();
+    }
+  }, [rows, currentColumn, currentRow, gameState]);
+
+  useEffect(() => {
+    readStates();
+  }, []);
+
+  const storeStates = async () => {
+    //rows, currentRow, currentColumn, gameState
+
+    const dataForToday = {
+      rows,
+      currentRow,
+      currentColumn,
+      gameState,
+    };
+    try {
+      const stringifiedExistingStates = await AsyncStorage.getItem(
+        '@gameStates',
+      );
+      const existingStates = stringifiedExistingStates
+        ? JSON.parse(stringifiedExistingStates)
+        : {};
+      existingStates[dayKey] = dataForToday;
+      const stringifiedData = JSON.stringify(existingStates);
+      console.log(stringifiedData);
+      await AsyncStorage.setItem('@gameStates', stringifiedData);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const readStates = async () => {
+    try {
+      const stringifiedData = await AsyncStorage.getItem('@gameStates');
+      const data = JSON.parse(stringifiedData);
+      const day = data[dayKey];
+      setRows(day.rows);
+      setCurrentColumn(day.currentColumn);
+      setCurrentRow(day.currentRow);
+      setGameState(day.gameState);
+    } catch (error) {
+      console.log(error);
+    }
+
+    setLoaded(true);
+  };
 
   const checkGameState = () => {
     if (checkIfWon() && gameState !== 'won') {
@@ -118,6 +173,10 @@ const Game = (): JSX.Element => {
   const greenCaps = getAllLettersWithColor(colors.primary);
   const yellowCaps = getAllLettersWithColor(colors.secondary);
   const greyCaps = getAllLettersWithColor(colors.darkgrey);
+
+  if (!loaded) {
+    return <ActivityIndicator />;
+  }
 
   return (
     <>
