@@ -20,7 +20,7 @@ interface IGameState {
   gameState: 'playing' | 'won' | 'lost';
 }
 
-const Game = (): JSX.Element => {
+const Game = () => {
   //AsyncStorage.removeItem('@gameStates');
   const word = dictionary[dayOfTheYear];
   const letters = word.split('');
@@ -44,7 +44,7 @@ const Game = (): JSX.Element => {
     if (loaded) {
       storeStates();
     }
-  }, [rows, currentColumn, currentRow, gameState]);
+  }, [rows, currentColumn, currentRow, gameState, loaded]);
 
   useEffect(() => {
     readStates();

@@ -17,11 +17,11 @@ const Keyboard = ({
   yellowCaps = [],
   greyCaps = [],
 }: KeyboardProps) => {
-  const isLongButton = key => {
+  const isLongButton = (key: string): boolean => {
     return key === ENTER || key === CLEAR;
   };
 
-  const getKeyBGColor = key => {
+  const getKeyBGColor = (key: string): string => {
     if (greyCaps.includes(key)) {
       return colors.darkgrey;
     }
