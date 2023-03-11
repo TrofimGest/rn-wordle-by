@@ -82,9 +82,9 @@ const EndScreen = ({won = false, rows, getCellBGColor}) => {
 
   const formatSeconds = () => {
     const timeComponents = [
-      Math.floor(secondsTillTommorow / (60 * 60)),
-      Math.floor((secondsTillTommorow % (60 * 60)) / 60),
-      Math.floor(secondsTillTommorow % 60),
+      Math.floor(secondsTillTommorow / (60 * 60)), //hours
+      Math.floor((secondsTillTommorow % (60 * 60)) / 60), //minutes
+      Math.floor(secondsTillTommorow % 60), //seconds
     ];
     const formattedTimeComponents = timeComponents.map(component =>
       component < 10 ? `0${component}` : component,

@@ -13,17 +13,26 @@ const NUMBER_OF_ROWS = 6;
 const dayOfTheYear = getDayOfTheYear();
 const dayKey = getDayKey();
 
+interface IGameState {
+  rows: string[][];
+  currentRow: number;
+  currentColumn: number;
+  gameState: 'playing' | 'won' | 'lost';
+}
+
 const Game = (): JSX.Element => {
   //AsyncStorage.removeItem('@gameStates');
   const word = dictionary[dayOfTheYear];
   const letters = word.split('');
-  const [rows, setRows] = useState(
+  const [rows, setRows] = useState<string[][]>(
     new Array(NUMBER_OF_ROWS).fill(new Array(letters.length).fill('')),
   );
-  const [currentRow, setCurrentRow] = useState(0);
-  const [currentColumn, setCurrentColumn] = useState(0);
-  const [gameState, setGameState] = useState('playing'); // won, lost, playing
-  const [loaded, setLoaded] = useState(false);
+  const [currentRow, setCurrentRow] = useState<number>(0);
+  const [currentColumn, setCurrentColumn] = useState<number>(0);
+  const [gameState, setGameState] = useState<'playing' | 'won' | 'lost'>(
+    'playing',
+  ); // won, lost, playing
+  const [loaded, setLoaded] = useState<boolean>(false);
 
   useEffect(() => {
     if (currentRow > 0) {
@@ -41,10 +50,10 @@ const Game = (): JSX.Element => {
     readStates();
   }, []);
 
-  const storeStates = async () => {
+  const storeStates = async (): Promise<void> => {
     //rows, currentRow, currentColumn, gameState
 
-    const dataForToday = {
+    const dataForToday: IGameState = {
       rows,
       currentRow,
       currentColumn,
@@ -54,9 +63,8 @@ const Game = (): JSX.Element => {
       const stringifiedExistingStates = await AsyncStorage.getItem(
         '@gameStates',
       );
-      const existingStates = stringifiedExistingStates
-        ? JSON.parse(stringifiedExistingStates)
-        : {};
+      const existingStates: Record<string, IGameState> =
+        stringifiedExistingStates ? JSON.parse(stringifiedExistingStates) : {};
       existingStates[dayKey] = dataForToday;
       const stringifiedData = JSON.stringify(existingStates);
       await AsyncStorage.setItem('@gameStates', stringifiedData);
@@ -65,10 +73,10 @@ const Game = (): JSX.Element => {
     }
   };
 
-  const readStates = async () => {
+  const readStates = async (): Promise<void> => {
     try {
       const stringifiedData = await AsyncStorage.getItem('@gameStates');
-      const data = JSON.parse(stringifiedData);
+      const data = JSON.parse(stringifiedData || '{}');
       const day = data[dayKey];
       setRows(day.rows);
       setCurrentColumn(day.currentColumn);
@@ -81,7 +89,7 @@ const Game = (): JSX.Element => {
     setLoaded(true);
   };
 
-  const checkGameState = () => {
+  const checkGameState = (): void => {
     if (checkIfWon() && gameState !== 'won') {
       setGameState('won');
     } else if (checkIfLost() && gameState !== 'lost') {
@@ -89,20 +97,20 @@ const Game = (): JSX.Element => {
     }
   };
 
-  const checkIfWon = () => {
+  const checkIfWon = (): boolean => {
     const row = rows[currentRow - 1];
     return row.every((letter, i) => letter === letters[i]);
   };
 
-  const checkIfLost = () => {
+  const checkIfLost = (): boolean => {
     return !checkIfWon() && currentRow === rows.length;
   };
 
-  const onKeyPressed = key => {
+  const onKeyPressed = (key: string): void => {
     if (gameState !== 'playing') {
       return;
     }
-    const updatedRows = copyArray(rows);
+    const updatedRows: string[][] = copyArray(rows);
 
     if (key === CLEAR) {
       const previousColumn = currentColumn - 1;
@@ -129,11 +137,11 @@ const Game = (): JSX.Element => {
     }
   };
 
-  const isCellActive = (row, column) => {
+  const isCellActive = (row: number, column: number) => {
     return row === currentRow && column === currentColumn;
   };
 
-  const getCellBGColor = (row, column) => {
+  const getCellBGColor = (row: number, column: number) => {
     const letter = rows[row][column];
 
     if (row >= currentRow) {
@@ -148,15 +156,15 @@ const Game = (): JSX.Element => {
     return colors.darkgrey;
   };
 
-  const getAllLettersWithColor = color => {
+  const getAllLettersWithColor = (color: string): string[] => {
     return rows.flatMap((row, i) =>
       row.filter((cell, j) => getCellBGColor(i, j) === color),
     );
   };
 
-  const greenCaps = getAllLettersWithColor(colors.primary);
-  const yellowCaps = getAllLettersWithColor(colors.secondary);
-  const greyCaps = getAllLettersWithColor(colors.darkgrey);
+  const greenCaps: string[] = getAllLettersWithColor(colors.primary);
+  const yellowCaps: string[] = getAllLettersWithColor(colors.secondary);
+  const greyCaps: string[] = getAllLettersWithColor(colors.darkgrey);
 
   if (!loaded) {
     return <ActivityIndicator />;

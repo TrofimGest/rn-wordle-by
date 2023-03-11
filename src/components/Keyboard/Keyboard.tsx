@@ -4,12 +4,19 @@ import {keys, ENTER, CLEAR, colors} from '../../constants';
 import styles, {keyWidth} from './Keyboard.styles';
 import Animated, {SlideInDown} from 'react-native-reanimated';
 
+type KeyboardProps = {
+  onKeyPressed: (key: string) => void;
+  yellowCaps: string[];
+  greyCaps: string[];
+  greenCaps: string[];
+};
+
 const Keyboard = ({
   onKeyPressed = () => {},
   greenCaps = [],
   yellowCaps = [],
   greyCaps = [],
-}) => {
+}: KeyboardProps) => {
   const isLongButton = key => {
     return key === ENTER || key === CLEAR;
   };
