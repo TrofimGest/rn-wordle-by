@@ -81,12 +81,18 @@ const EndScreen = ({won = false, rows, getCellBGColor}) => {
   }, []);
 
   const formatSeconds = () => {
-    const hours = Math.floor(secondsTillTommorow / (60 * 60));
-    const minutes = Math.floor((secondsTillTommorow % (60 * 60)) / 60);
-    const seconds = Math.floor(secondsTillTommorow % 60);
+    const timeComponents = [
+      Math.floor(secondsTillTommorow / (60 * 60)),
+      Math.floor((secondsTillTommorow % (60 * 60)) / 60),
+      Math.floor(secondsTillTommorow % 60),
+    ];
+    const formattedTimeComponents = timeComponents.map(component =>
+      component < 10 ? `0${component}` : component,
+    );
 
-    return `${hours}:${minutes}:${seconds}`;
+    return formattedTimeComponents.join(':');
   };
+
   const shareScore = () => {
     const textMap = rows
       .map((row, i) =>
@@ -94,9 +100,12 @@ const EndScreen = ({won = false, rows, getCellBGColor}) => {
       )
       .filter(row => row)
       .join('\n');
-    const textToShare = `Wordle \n${textMap}`;
+    const textToShare = `ЎОРДЛІ \n${textMap}`;
     Clipboard.setString(textToShare);
-    Alert.alert('Copied successfully', 'Share your score on you social media');
+    Alert.alert(
+      'Скапіявана паспяхова',
+      'Падзяліся вынікам у сваіх сацыяльных сетках',
+    );
   };
 
   const readStates = async () => {
