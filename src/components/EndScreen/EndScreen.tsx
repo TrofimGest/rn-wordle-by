@@ -1,4 +1,5 @@
 import {
+  SafeAreaView,
   Pressable,
   StyleSheet,
   Text,
@@ -37,7 +38,7 @@ const GuessDistribution = ({distribution}) => {
   const sum = distribution.reduce((acc, dist) => dist + acc, 0);
   return (
     <>
-      <Text style={styles.subtitle}>GUESS DISTRIBUTION</Text>
+      <Text style={styles.subtitle}>ГІСТОРЫЯ ГУЛЬНЯЎ</Text>
       <View style={styles.guessDistributionContainer}>
         {distribution.map((dist, index) => (
           <GuessDistributionLine
@@ -152,24 +153,24 @@ const EndScreen = ({won = false, rows, getCellBGColor}) => {
   }
 
   return (
-    <View>
+    <SafeAreaView>
       <Animated.Text
         entering={SlideInLeft.delay(100).springify().mass(0.4)}
         style={styles.title}>
-        {won ? 'congrats' : 'try again tommorow'}
+        {won ? 'Віншую!' : 'Паспрабуй заўтра'}
       </Animated.Text>
       <Animated.Text
         entering={SlideInLeft.delay(100).springify().mass(0.4)}
         style={styles.subtitle}>
-        STATS
+        СТАТЫСТЫКА
       </Animated.Text>
       <Animated.View
         entering={SlideInLeft.delay(100).springify().mass(0.4)}
         style={styles.statisticsContainer}>
-        <Number number={played} label={'Played'} />
-        <Number number={winRate} label={'Win %'} />
-        <Number number={currentStreak} label={'Current streak'} />
-        <Number number={maxStreak} label={'Max streak'} />
+        <Number number={played} label={'Усяго гульняў'} />
+        <Number number={winRate} label={'% перамог'} />
+        <Number number={currentStreak} label={'Бягучая серыя'} />
+        <Number number={maxStreak} label={'Найлепшая серыя'} />
       </Animated.View>
       <Animated.View entering={SlideInLeft.delay(150).springify().mass(0.4)}>
         <GuessDistribution distribution={distribution} />
@@ -178,14 +179,14 @@ const EndScreen = ({won = false, rows, getCellBGColor}) => {
         entering={SlideInLeft.delay(200).springify().mass(0.4)}
         style={styles.miscContainer}>
         <View style={styles.nextWordleContainer}>
-          <Text style={styles.nextWordleText}>Next Wordle</Text>
+          <Text style={styles.nextWordleText}>Наступнае слова дня</Text>
           <Text style={styles.nextWordleTime}>{formatSeconds()}</Text>
         </View>
         <Pressable style={styles.shareButton} onPress={shareScore}>
-          <Text style={styles.shareButtonText}>Share</Text>
+          <Text style={styles.shareButtonText}>Падзяліцца</Text>
         </Pressable>
       </Animated.View>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -194,9 +195,9 @@ export default EndScreen;
 const styles = StyleSheet.create({
   title: {
     color: colors.lightgrey,
-    fontSize: 30,
+    fontSize: 25,
     textAlign: 'center',
-    marginVertical: 20,
+    marginVertical: 15,
   },
   subtitle: {
     color: colors.lightgrey,
@@ -211,6 +212,7 @@ const styles = StyleSheet.create({
   },
   numberContainer: {
     alignItems: 'center',
+    maxWidth: '25%',
     marginHorizontal: 10,
   },
   number: {
@@ -222,6 +224,7 @@ const styles = StyleSheet.create({
     color: colors.lightgrey,
     fontSize: 16,
     fontWeight: 'bold',
+    textAlign: 'center',
   },
   guessDistributionContainer: {
     width: '100%',
