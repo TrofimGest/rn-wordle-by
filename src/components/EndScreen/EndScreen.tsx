@@ -1,7 +1,6 @@
 import {
   SafeAreaView,
   Pressable,
-  StyleSheet,
   Text,
   View,
   Alert,
@@ -11,7 +10,8 @@ import React, {useState, useEffect} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Animated, {SlideInLeft} from 'react-native-reanimated';
 import Clipboard from '@react-native-clipboard/clipboard';
-import {colors, colorsToEmoji} from '../../constants';
+import {colorsToEmoji} from '../../constants';
+import styles from './EndScreen.styles';
 
 type NumberProps = {
   number: number;
@@ -242,85 +242,3 @@ const EndScreen = ({won = false, rows, getCellBGColor}: EndScreenProps) => {
 };
 
 export default EndScreen;
-
-const styles = StyleSheet.create({
-  title: {
-    color: colors.lightgrey,
-    fontSize: 25,
-    textAlign: 'center',
-    marginVertical: 15,
-  },
-  subtitle: {
-    color: colors.lightgrey,
-    fontSize: 20,
-    textAlign: 'center',
-    marginVertical: 15,
-  },
-  statisticsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginBottom: 20,
-  },
-  numberContainer: {
-    alignItems: 'center',
-    maxWidth: '25%',
-    marginHorizontal: 10,
-  },
-  number: {
-    color: colors.lightgrey,
-    fontSize: 30,
-    fontWeight: 'bold',
-  },
-  label: {
-    color: colors.lightgrey,
-    fontSize: 16,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  guessDistributionContainer: {
-    width: '100%',
-    padding: 20,
-  },
-  positionContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '100%',
-  },
-  position: {
-    color: colors.lightgrey,
-  },
-  amountContainer: {
-    width: '80%',
-    alignSelf: 'stretch',
-    backgroundColor: colors.grey,
-    margin: 5,
-    padding: 5,
-  },
-  amount: {
-    color: colors.lightgrey,
-  },
-  miscContainer: {
-    flexDirection: 'row',
-    padding: 10,
-  },
-  nextWordleContainer: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  nextWordleText: {
-    color: colors.lightgrey,
-  },
-  nextWordleTime: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: colors.lightgrey,
-  },
-  shareButton: {
-    flex: 1,
-    backgroundColor: colors.primary,
-    borderRadius: 25,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  shareButtonText: {fontWeight: 'bold', color: colors.lightgrey},
-});
