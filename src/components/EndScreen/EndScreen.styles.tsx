@@ -19,6 +19,10 @@ export default StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 20,
   },
+  guessDistributionMarginContainer: {
+    marginLeft: 5,
+    marginRight: 10,
+  },
   miscContainer: {
     flexDirection: 'row',
     padding: 10,
@@ -42,5 +46,8 @@ export default StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  shareButtonText: {fontWeight: 'bold', color: colors.lightgrey},
+  shareButtonText: {
+    fontWeight: 'bold',
+    color: colors.lightgrey,
+  },
 });

@@ -11,17 +11,20 @@ const GuessDistribution = ({distribution}: Props) => {
   if (!distribution) {
     return <></>;
   }
-  const sum = distribution.reduce((acc, dist) => dist + acc, 0);
+
+  const max = Math.max(...distribution);
+  const normalizedDistribution = distribution.map(d => (100 * d) / max);
+
   return (
     <>
       <Text style={styles.subtitle}>ГІСТОРЫЯ ГУЛЬНЯЎ</Text>
       <View style={styles.guessDistributionContainer}>
-        {distribution.map((dist, index) => (
+        {normalizedDistribution.map((dist, index) => (
           <GuessDistributionLine
             key={`line-${index + 1}`}
             position={index + 1}
-            amount={dist}
-            percentage={(100 * sum) / dist}
+            amount={distribution[index]}
+            percentage={dist}
           />
         ))}
       </View>
@@ -37,6 +40,7 @@ const styles = StyleSheet.create({
     marginVertical: 15,
   },
   guessDistributionContainer: {
+    justifyContent: 'flex-start',
     width: '100%',
     padding: 20,
   },

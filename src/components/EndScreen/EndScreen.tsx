@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useMemo} from 'react';
 import {
   SafeAreaView,
   Pressable,
@@ -53,7 +53,7 @@ const EndScreen: React.FC<EndScreenProps> = ({
     return () => clearInterval(interval);
   }, []);
 
-  const formatSeconds = () => {
+  const formatSeconds = useMemo(() => {
     const timeComponents: Array<number> = [
       Math.floor(secondsTillTommorow / (60 * 60)), //hours
       Math.floor((secondsTillTommorow % (60 * 60)) / 60), //minutes
@@ -65,7 +65,7 @@ const EndScreen: React.FC<EndScreenProps> = ({
     );
 
     return formattedTimeComponents.join(':');
-  };
+  }, [secondsTillTommorow]);
 
   const shareScore = (): void => {
     const textMap: string = rows
@@ -130,7 +130,7 @@ const EndScreen: React.FC<EndScreenProps> = ({
 
       //guess distributoin
 
-      const dist = [0, 0, 0, 0, 0, 0]; //number of lines/tries (6)
+      const dist = [1, 2, 3, 4, 0, 0]; //number of lines/tries (6)
 
       values.forEach(game => {
         if (game.gameState === GameCondition.WON) {
@@ -170,7 +170,9 @@ const EndScreen: React.FC<EndScreenProps> = ({
         <Number number={currentStreak} label={'Бягучая серыя'} />
         <Number number={maxStreak} label={'Найлепшая серыя'} />
       </Animated.View>
-      <Animated.View entering={SlideInLeft.delay(150).springify().mass(0.4)}>
+      <Animated.View
+        style={styles.guessDistributionMarginContainer}
+        entering={SlideInLeft.delay(150).springify().mass(0.4)}>
         <GuessDistribution distribution={distribution} />
       </Animated.View>
       <Animated.View
@@ -178,7 +180,7 @@ const EndScreen: React.FC<EndScreenProps> = ({
         style={styles.miscContainer}>
         <View style={styles.nextWordleContainer}>
           <Text style={styles.nextWordleText}>Наступнае слова дня</Text>
-          <Text style={styles.nextWordleTime}>{formatSeconds()}</Text>
+          <Text style={styles.nextWordleTime}>{formatSeconds}</Text>
         </View>
         <Pressable style={styles.shareButton} onPress={shareScore}>
           <Text style={styles.shareButtonText}>Падзяліцца</Text>

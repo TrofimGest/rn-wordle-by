@@ -29,8 +29,8 @@ const styles = StyleSheet.create({
     color: colors.lightgrey,
   },
   amountContainer: {
-    width: '80%',
-    alignSelf: 'stretch',
+    width: '100%',
+    alignItems: 'flex-end',
     backgroundColor: colors.grey,
     margin: 5,
     padding: 5,
