@@ -19,44 +19,6 @@ export default StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 20,
   },
-  numberContainer: {
-    alignItems: 'center',
-    maxWidth: '25%',
-    marginHorizontal: 10,
-  },
-  number: {
-    color: colors.lightgrey,
-    fontSize: 30,
-    fontWeight: 'bold',
-  },
-  label: {
-    color: colors.lightgrey,
-    fontSize: 16,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  guessDistributionContainer: {
-    width: '100%',
-    padding: 20,
-  },
-  positionContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '100%',
-  },
-  position: {
-    color: colors.lightgrey,
-  },
-  amountContainer: {
-    width: '80%',
-    alignSelf: 'stretch',
-    backgroundColor: colors.grey,
-    margin: 5,
-    padding: 5,
-  },
-  amount: {
-    color: colors.lightgrey,
-  },
   miscContainer: {
     flexDirection: 'row',
     padding: 10,

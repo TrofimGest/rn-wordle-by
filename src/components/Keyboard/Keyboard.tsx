@@ -1,8 +1,8 @@
 import React from 'react';
 import {View, Text, Pressable} from 'react-native';
+import Animated, {SlideInDown} from 'react-native-reanimated';
 import {keys, ENTER, CLEAR, colors} from '../../constants';
 import styles, {keyWidth} from './Keyboard.styles';
-import Animated, {SlideInDown} from 'react-native-reanimated';
 
 type KeyboardProps = {
   onKeyPressed: (key: string) => void;

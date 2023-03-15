@@ -1,26 +1,20 @@
 import React, {useState, useEffect} from 'react';
 import {Text, View, ActivityIndicator} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {colors, CLEAR, ENTER} from '../../constants';
-import styles from './Game.styles';
+import Animated, {SlideInLeft} from 'react-native-reanimated';
 import Keyboard from '../Keyboard';
+import EndScreen from '../EndScreen';
+import {GameCondition, GameDataState} from '../../types/types';
 import dictionary from '../../dictionary';
 import {getDayOfTheYear, copyArray, getDayKey} from '../../utils';
-import EndScreen from '../EndScreen';
-import Animated, {SlideInLeft} from 'react-native-reanimated';
+import {colors, CLEAR, ENTER} from '../../constants';
+import styles from './Game.styles';
 
 const NUMBER_OF_ROWS = 6;
 const dayOfTheYear = getDayOfTheYear();
 const dayKey = getDayKey();
 
-interface IGameState {
-  rows: string[][];
-  currentRow: number;
-  currentColumn: number;
-  gameState: 'playing' | 'won' | 'lost';
-}
-
-const Game = () => {
+const Game: React.FC = () => {
   //AsyncStorage.removeItem('@gameStates');
   const word = dictionary[dayOfTheYear];
   const letters = word.split('');
@@ -29,9 +23,9 @@ const Game = () => {
   );
   const [currentRow, setCurrentRow] = useState<number>(0);
   const [currentColumn, setCurrentColumn] = useState<number>(0);
-  const [gameState, setGameState] = useState<'playing' | 'won' | 'lost'>(
-    'playing',
-  ); // won, lost, playing
+  const [gameState, setGameState] = useState<GameCondition>(
+    GameCondition.PLAYING,
+  );
   const [loaded, setLoaded] = useState<boolean>(false);
 
   useEffect(() => {
@@ -53,7 +47,7 @@ const Game = () => {
   const storeStates = async (): Promise<void> => {
     //rows, currentRow, currentColumn, gameState
 
-    const dataForToday: IGameState = {
+    const dataForToday: GameDataState = {
       rows,
       currentRow,
       currentColumn,
@@ -63,7 +57,7 @@ const Game = () => {
       const stringifiedExistingStates = await AsyncStorage.getItem(
         '@gameStates',
       );
-      const existingStates: Record<string, IGameState> =
+      const existingStates: Record<string, GameDataState> =
         stringifiedExistingStates ? JSON.parse(stringifiedExistingStates) : {};
       existingStates[dayKey] = dataForToday;
       const stringifiedData = JSON.stringify(existingStates);
@@ -90,10 +84,10 @@ const Game = () => {
   };
 
   const checkGameState = (): void => {
-    if (checkIfWon() && gameState !== 'won') {
-      setGameState('won');
-    } else if (checkIfLost() && gameState !== 'lost') {
-      setGameState('lost');
+    if (checkIfWon() && gameState !== GameCondition.WON) {
+      setGameState(GameCondition.WON);
+    } else if (checkIfLost() && gameState !== GameCondition.LOST) {
+      setGameState(GameCondition.LOST);
     }
   };
 
@@ -107,7 +101,7 @@ const Game = () => {
   };
 
   const onKeyPressed = (key: string): void => {
-    if (gameState !== 'playing') {
+    if (gameState !== GameCondition.PLAYING) {
       return;
     }
     const updatedRows: string[][] = copyArray(rows);
@@ -170,10 +164,10 @@ const Game = () => {
     return <ActivityIndicator />;
   }
 
-  if (gameState !== 'playing') {
+  if (gameState !== GameCondition.PLAYING) {
     return (
       <EndScreen
-        won={gameState === 'won'}
+        won={gameState === GameCondition.WON}
         rows={rows}
         getCellBGColor={getCellBGColor}
       />

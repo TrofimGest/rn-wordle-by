@@ -1,3 +1,4 @@
+import React, {useState, useEffect} from 'react';
 import {
   SafeAreaView,
   Pressable,
@@ -6,71 +7,14 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import React, {useState, useEffect} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Animated, {SlideInLeft} from 'react-native-reanimated';
 import Clipboard from '@react-native-clipboard/clipboard';
+import Number from './Number/Number';
+import GuessDistribution from './GuessDistribution/GuessDistribution';
+import {GameCondition, GameData} from '../../types/types';
 import {colorsToEmoji} from '../../constants';
 import styles from './EndScreen.styles';
-
-type NumberProps = {
-  number: number;
-  label: string;
-};
-
-const Number = ({number, label}: NumberProps) => (
-  <View style={styles.numberContainer}>
-    <Text style={styles.number}>{number}</Text>
-    <Text style={styles.label}>{label}</Text>
-  </View>
-);
-
-type GuessDistributionLineProps = {
-  position: number;
-  amount: number;
-  percentage: number;
-};
-
-const GuessDistributionLine = ({
-  position,
-  amount,
-  percentage,
-}: GuessDistributionLineProps) => {
-  return (
-    <View style={styles.positionContainer}>
-      <Text style={styles.position}>{position}</Text>
-      <View style={[styles.amountContainer, {width: `${percentage}%`}]}>
-        <Text style={styles.amount}>{amount}</Text>
-      </View>
-    </View>
-  );
-};
-
-type GuessDistributionProps = {
-  distribution: number[];
-};
-
-const GuessDistribution = ({distribution}: GuessDistributionProps) => {
-  if (!distribution) {
-    return <></>;
-  }
-  const sum = distribution.reduce((acc, dist) => dist + acc, 0);
-  return (
-    <>
-      <Text style={styles.subtitle}>ГІСТОРЫЯ ГУЛЬНЯЎ</Text>
-      <View style={styles.guessDistributionContainer}>
-        {distribution.map((dist, index) => (
-          <GuessDistributionLine
-            key={`line-${index + 1}`}
-            position={index + 1}
-            amount={dist}
-            percentage={(100 * sum) / dist}
-          />
-        ))}
-      </View>
-    </>
-  );
-};
 
 type EndScreenProps = {
   won: boolean;
@@ -78,16 +22,11 @@ type EndScreenProps = {
   getCellBGColor: (i: number, j: number) => string;
 };
 
-interface GameState {
-  gameState: string;
-  rows: Array<Array<boolean>>;
-}
-
-interface GameData {
-  [key: string]: GameState;
-}
-
-const EndScreen = ({won = false, rows, getCellBGColor}: EndScreenProps) => {
+const EndScreen: React.FC<EndScreenProps> = ({
+  won = false,
+  rows,
+  getCellBGColor,
+}) => {
   const [secondsTillTommorow, setSecondsTillTommorow] = useState<number>(0);
   const [played, setPlayed] = useState<number>(0);
   const [winRate, setWinRate] = useState<number>(0);
@@ -146,57 +85,65 @@ const EndScreen = ({won = false, rows, getCellBGColor}: EndScreenProps) => {
   };
 
   const readStates = async (): Promise<void> => {
-    let data: GameData = {};
     try {
       const stringifiedData = await AsyncStorage.getItem('@gameStates');
-      if (stringifiedData) {
-        data = JSON.parse(stringifiedData);
+      if (!stringifiedData) {
+        return;
       }
+      const data: GameData = JSON.parse(stringifiedData);
+      const keys: Array<string> = Object.keys(data);
+      const values = Object.values(data);
+      const numberOfWins: number = values.filter(
+        game => game.gameState === GameCondition.WON,
+      ).length;
+
+      let currentGameStreak: number = 0;
+      let maxGameStreak: number = 0;
+      let previousDay: number = 0;
+
+      //counting current streak and max streak for stats
+      keys.forEach((key: string): void => {
+        const day = parseInt(key.split('-')[1], 10);
+        if (
+          data[key].gameState === GameCondition.WON &&
+          currentGameStreak === 0
+        ) {
+          currentGameStreak += 1;
+        } else if (
+          data[key].gameState === GameCondition.WON &&
+          previousDay + 1 === day
+        ) {
+          currentGameStreak += 1;
+        } else {
+          if (currentGameStreak > maxGameStreak) {
+            maxGameStreak = currentGameStreak;
+          }
+          currentGameStreak = data[key].gameState === GameCondition.WON ? 1 : 0;
+        }
+        previousDay = day;
+      });
+      setPlayed(keys.length);
+      setWinRate(Math.floor((100 * numberOfWins) / keys.length));
+      setCurrentStreak(currentGameStreak);
+      setMaxStreak(maxGameStreak);
+      setLoaded(true);
+
+      //guess distributoin
+
+      const dist = [0, 0, 0, 0, 0, 0]; //number of lines/tries (6)
+
+      values.forEach(game => {
+        if (game.gameState === GameCondition.WON) {
+          const tries = game.rows.filter(
+            (row: Array<boolean>) => row[0],
+          ).length;
+          dist[tries] = dist[tries] + 1;
+        }
+      });
+      setDistribution(dist);
     } catch (error) {
       console.log(error);
     }
-
-    const keys: Array<string> = Object.keys(data || {});
-    const values = Object.values(data || {});
-    const numberOfWins: number = values.filter(
-      game => game.gameState === 'won',
-    ).length;
-    let _currentStreak: number = 0;
-    let _maxStreak: number = 0;
-    let previousDay: number = 0;
-
-    //counting current streak and max streak for stats
-    keys.forEach((key: string): void => {
-      const day = parseInt(key.split('-')[1], 10);
-      if (data[key].gameState === 'won' && _currentStreak === 0) {
-        _currentStreak += 1;
-      } else if (data[key].gameState === 'won' && previousDay + 1 === day) {
-        _currentStreak += 1;
-      } else {
-        if (_currentStreak > _maxStreak) {
-          _maxStreak = _currentStreak;
-        }
-        _currentStreak = data[key].gameState === 'won' ? 1 : 0;
-      }
-      previousDay = day;
-    });
-    setPlayed(keys.length);
-    setWinRate(Math.floor((100 * numberOfWins) / keys.length));
-    setCurrentStreak(_currentStreak);
-    setMaxStreak(_maxStreak);
-    setLoaded(true);
-
-    //guess distributoin
-
-    const dist = [0, 0, 0, 0, 0, 0]; //number of lines/tries (6)
-
-    values.forEach(game => {
-      if (game.gameState === 'won') {
-        const tries = game.rows.filter((row: Array<boolean>) => row[0]).length;
-        dist[tries] = dist[tries] + 1;
-      }
-    });
-    setDistribution(dist);
   };
 
   if (!loaded) {
