@@ -29,7 +29,6 @@ const Keyboard = ({
       return colors.primary;
     }
     if (yellowCaps.includes(key)) {
-      console.log('key', yellowCaps.includes(key));
       return colors.secondary;
     }
 

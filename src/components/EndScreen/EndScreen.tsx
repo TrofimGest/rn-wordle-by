@@ -12,7 +12,7 @@ import Animated, {SlideInLeft} from 'react-native-reanimated';
 import Clipboard from '@react-native-clipboard/clipboard';
 import Number from './Number/Number';
 import GuessDistribution from './GuessDistribution/GuessDistribution';
-import {GameCondition, GameData} from '../../types/types';
+import {GameData} from '../../types/types';
 import {colorsToEmoji} from '../../constants';
 import styles from './EndScreen.styles';
 
@@ -22,11 +22,7 @@ type EndScreenProps = {
   getCellBGColor: (i: number, j: number) => string;
 };
 
-const EndScreen: React.FC<EndScreenProps> = ({
-  won = false,
-  rows,
-  getCellBGColor,
-}) => {
+const EndScreen: React.FC<EndScreenProps> = ({won, rows, getCellBGColor}) => {
   const [secondsTillTommorow, setSecondsTillTommorow] = useState<number>(0);
   const [played, setPlayed] = useState<number>(0);
   const [winRate, setWinRate] = useState<number>(0);
@@ -36,7 +32,10 @@ const EndScreen: React.FC<EndScreenProps> = ({
   const [loaded, setLoaded] = useState<boolean>(false);
 
   useEffect(() => {
-    readStates();
+    const delay = setTimeout(() => {
+      readStates();
+    }, 200); // delay for 0.2 second
+    return () => clearTimeout(delay);
   }, []);
 
   useEffect(() => {
@@ -94,7 +93,7 @@ const EndScreen: React.FC<EndScreenProps> = ({
       const keys: Array<string> = Object.keys(data);
       const values = Object.values(data);
       const numberOfWins: number = values.filter(
-        game => game.gameState === GameCondition.WON,
+        game => game.gameState === 'won',
       ).length;
 
       let currentGameStreak: number = 0;
@@ -104,21 +103,15 @@ const EndScreen: React.FC<EndScreenProps> = ({
       //counting current streak and max streak for stats
       keys.forEach((key: string): void => {
         const day = parseInt(key.split('-')[1], 10);
-        if (
-          data[key].gameState === GameCondition.WON &&
-          currentGameStreak === 0
-        ) {
+        if (data[key].gameState === 'won' && currentGameStreak === 0) {
           currentGameStreak += 1;
-        } else if (
-          data[key].gameState === GameCondition.WON &&
-          previousDay + 1 === day
-        ) {
+        } else if (data[key].gameState === 'won' && previousDay + 1 === day) {
           currentGameStreak += 1;
-        } else {
-          if (currentGameStreak > maxGameStreak) {
-            maxGameStreak = currentGameStreak;
-          }
-          currentGameStreak = data[key].gameState === GameCondition.WON ? 1 : 0;
+        }
+        currentGameStreak = data[key].gameState === 'won' ? 1 : 0;
+
+        if (currentGameStreak > maxGameStreak) {
+          maxGameStreak = currentGameStreak;
         }
         previousDay = day;
       });
@@ -126,21 +119,21 @@ const EndScreen: React.FC<EndScreenProps> = ({
       setWinRate(Math.floor((100 * numberOfWins) / keys.length));
       setCurrentStreak(currentGameStreak);
       setMaxStreak(maxGameStreak);
-      setLoaded(true);
 
       //guess distributoin
 
-      const dist = [1, 2, 3, 4, 0, 0]; //number of lines/tries (6)
+      const dist = [0, 0, 0, 0, 0, 0]; //number of lines/tries (6)
 
       values.forEach(game => {
-        if (game.gameState === GameCondition.WON) {
+        if (game.gameState === 'won') {
           const tries = game.rows.filter(
             (row: Array<boolean>) => row[0],
           ).length;
-          dist[tries] = dist[tries] + 1;
+          dist[tries - 1] = dist[tries - 1] + 1;
         }
       });
       setDistribution(dist);
+      setLoaded(true);
     } catch (error) {
       console.log(error);
     }
