@@ -66,3 +66,5 @@ yarn-error.log
 
 ./src/dictionary.ts
 src/dictionary.ts
+./src/wordslists.ts
+src/wordslists.ts

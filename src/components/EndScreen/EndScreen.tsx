@@ -120,7 +120,7 @@ const EndScreen: React.FC<EndScreenProps> = ({won, rows, getCellBGColor}) => {
       setCurrentStreak(currentGameStreak);
       setMaxStreak(maxGameStreak);
 
-      //guess distributoin
+      //guess distribution
 
       const dist = [0, 0, 0, 0, 0, 0]; //number of lines/tries (6)
 

@@ -1,22 +1,22 @@
 import React, {useState, useEffect} from 'react';
-import {Text, View, ActivityIndicator} from 'react-native';
+import {Text, View, ActivityIndicator, Alert} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Animated, {SlideInLeft} from 'react-native-reanimated';
 import Keyboard from '../Keyboard';
 import EndScreen from '../EndScreen';
 import {GameCondition, GameDataState} from '../../types/types';
-import dictionary from '../../dictionary';
-import {getDayOfTheYear, copyArray, getDayKey} from '../../utils';
+import {possibleTasks, allowedGuesses} from '../../dictionary';
+import {getWordIndex, copyArray, getDayKey} from '../../utils';
 import {colors, CLEAR, ENTER} from '../../constants';
 import styles from './Game.styles';
 
 const NUMBER_OF_ROWS = 6;
-const dayOfTheYear = getDayOfTheYear();
+const wordIndex = getWordIndex();
 const dayKey = getDayKey();
 
 const Game: React.FC = () => {
   //AsyncStorage.removeItem('@gameStates');
-  const word = dictionary[dayOfTheYear];
+  const word = possibleTasks[wordIndex];
   const letters = word.split('');
   const [rows, setRows] = useState<string[][]>(
     new Array(NUMBER_OF_ROWS).fill(new Array(letters.length).fill('')),
@@ -118,8 +118,16 @@ const Game: React.FC = () => {
 
     if (key === ENTER) {
       if (currentColumn === rows[0].length) {
-        setCurrentRow(currentRow + 1);
-        setCurrentColumn(0);
+        const rowValue = rows[currentRow].join('');
+        if (
+          !allowedGuesses.includes(rowValue) &&
+          !possibleTasks.includes(rowValue)
+        ) {
+          Alert.alert('Гэтае слова мне невядома');
+        } else {
+          setCurrentRow(currentRow + 1);
+          setCurrentColumn(0);
+        }
       }
       return;
     }

@@ -17,3 +17,13 @@ export const getDayKey = (): string => {
   const day = getDayOfTheYear();
   return `day-${day}-${year}`;
 };
+
+export const getWordIndex = (): number => {
+  const today: Date = new Date();
+  const zeroDay: Date = new Date('2023-03-20');
+  const daysSinceZero: number = Math.floor(
+    (today.getTime() - zeroDay.getTime()) / (1000 * 60 * 60 * 24),
+  ); // Calculate the number of days since the zero day
+  const index: number = daysSinceZero % 5535; // 5535 is a dictionary size (don't want to import dictionary here)
+  return index;
+};
