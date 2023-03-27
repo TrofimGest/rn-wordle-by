@@ -23,7 +23,7 @@ type EndScreenProps = {
 };
 
 const EndScreen: React.FC<EndScreenProps> = ({won, rows, getCellBGColor}) => {
-  const [secondsTillTommorow, setSecondsTillTommorow] = useState<number>(0);
+  const [secondsTillTomorrow, setSecondsTillTomorrow] = useState<number>(0);
   const [played, setPlayed] = useState<number>(0);
   const [winRate, setWinRate] = useState<number>(0);
   const [currentStreak, setCurrentStreak] = useState<number>(0);
@@ -41,12 +41,12 @@ const EndScreen: React.FC<EndScreenProps> = ({won, rows, getCellBGColor}) => {
   useEffect(() => {
     const updateTime = (): void => {
       const now = new Date();
-      const tommorow = new Date(
+      const tomorrow = new Date(
         now.getFullYear(),
         now.getMonth(),
         now.getDate() + 1,
       );
-      setSecondsTillTommorow((tommorow.getTime() - now.getTime()) / 1000); //seconds
+      setSecondsTillTomorrow((tomorrow.getTime() - now.getTime()) / 1000); //seconds
     };
     const interval = setInterval(updateTime, 1000);
     return () => clearInterval(interval);
@@ -54,9 +54,9 @@ const EndScreen: React.FC<EndScreenProps> = ({won, rows, getCellBGColor}) => {
 
   const formatSeconds = useMemo(() => {
     const timeComponents: Array<number> = [
-      Math.floor(secondsTillTommorow / (60 * 60)), //hours
-      Math.floor((secondsTillTommorow % (60 * 60)) / 60), //minutes
-      Math.floor(secondsTillTommorow % 60), //seconds
+      Math.floor(secondsTillTomorrow / (60 * 60)), //hours
+      Math.floor((secondsTillTomorrow % (60 * 60)) / 60), //minutes
+      Math.floor(secondsTillTomorrow % 60), //seconds
     ];
     const formattedTimeComponents: Array<string> = timeComponents.map(
       (component: number): string =>
@@ -64,7 +64,7 @@ const EndScreen: React.FC<EndScreenProps> = ({won, rows, getCellBGColor}) => {
     );
 
     return formattedTimeComponents.join(':');
-  }, [secondsTillTommorow]);
+  }, [secondsTillTomorrow]);
 
   const shareScore = (): void => {
     const textMap: string = rows

@@ -1,9 +1,14 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {SafeAreaView, StatusBar, StyleSheet, Text} from 'react-native';
+import SplashScreen from 'react-native-splash-screen';
 import Game from './src/components/Game';
 import {colors} from './src/constants';
 
 function App(): JSX.Element {
+  useEffect(() => {
+    SplashScreen.hide();
+  }, []);
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" />
