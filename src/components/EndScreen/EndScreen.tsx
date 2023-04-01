@@ -20,9 +20,15 @@ type EndScreenProps = {
   won: boolean;
   rows: string[][];
   getCellBGColor: (i: number, j: number) => string;
+  wordOfTheDay: string;
 };
 
-const EndScreen: React.FC<EndScreenProps> = ({won, rows, getCellBGColor}) => {
+const EndScreen: React.FC<EndScreenProps> = ({
+  won,
+  rows,
+  getCellBGColor,
+  wordOfTheDay,
+}) => {
   const [secondsTillTomorrow, setSecondsTillTomorrow] = useState<number>(0);
   const [played, setPlayed] = useState<number>(0);
   const [winRate, setWinRate] = useState<number>(0);
@@ -62,8 +68,8 @@ const EndScreen: React.FC<EndScreenProps> = ({won, rows, getCellBGColor}) => {
       (component: number): string =>
         component < 10 ? `0${component}` : `${component}`,
     );
-
-    return formattedTimeComponents.join(':');
+    const formattedTime = formattedTimeComponents.join(':');
+    return formattedTime;
   }, [secondsTillTomorrow]);
 
   const shareScore = (): void => {
@@ -148,7 +154,12 @@ const EndScreen: React.FC<EndScreenProps> = ({won, rows, getCellBGColor}) => {
       <Animated.Text
         entering={SlideInLeft.delay(100).springify().mass(0.4)}
         style={styles.title}>
-        {won ? 'Віншую!' : 'Паспрабуй заўтра'}
+        {won ? 'ВІНШУЮ!' : 'Паспрабуй заўтра'}
+      </Animated.Text>
+      <Animated.Text
+        entering={SlideInLeft.delay(100).springify().mass(0.4)}
+        style={styles.title}>
+        Слова дня - {wordOfTheDay.toUpperCase()}
       </Animated.Text>
       <Animated.Text
         entering={SlideInLeft.delay(100).springify().mass(0.4)}

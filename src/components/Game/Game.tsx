@@ -38,7 +38,7 @@ const Game: React.FC = () => {
     if (loaded) {
       storeStates();
     }
-  }, [rows, currentColumn, currentRow, gameState, loaded]);
+  }, [rows, currentColumn, currentRow, gameState, loaded, dayKey]);
 
   useEffect(() => {
     readStates();
@@ -178,6 +178,7 @@ const Game: React.FC = () => {
         won={gameState === GameCondition.WON}
         rows={rows}
         getCellBGColor={getCellBGColor}
+        wordOfTheDay={word}
       />
     );
   }
